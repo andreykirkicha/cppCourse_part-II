@@ -2,8 +2,8 @@
 
 // ====================================================================================================================
 
-template<class Typename>
-void for_each_int(int * top, int * end, Typename function)
+template<typename Type>
+void for_each_int(int * top, int * end, Type function)
 {
     for ( ; top != end; ++top)
         function(*top);
