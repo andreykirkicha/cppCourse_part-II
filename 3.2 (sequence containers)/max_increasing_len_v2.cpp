@@ -8,16 +8,20 @@ size_t max_increasing_len(IteratorType start, IteratorType end)
 {
     size_t max_increasing_len = 0;
 
-    for ( ; start != end; ++start)
+    if (start == end) return max_increasing_len;
+    
+    ++start;
+    if (start-- == end) max_increasing_len = 1;
+
+    for (start++; start != end; ++start)
     {
-        auto i = start;
+        auto prev = start, next = prev--;
         size_t current_len = 1;
 
-        // testing system does not accept this way
-        while (*i < *(++i))
+        while (*prev < *next)
         {
-            if (i != end) ++current_len;
-            else break; 
+            if (next != end) ++current_len, ++prev, ++next;
+            else break;
         }
 
         if (max_increasing_len < current_len) { max_increasing_len = current_len; }
