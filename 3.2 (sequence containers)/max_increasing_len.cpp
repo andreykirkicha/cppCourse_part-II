@@ -3,21 +3,31 @@
 
 // ====================================================================================================================
 
+// it actually works
 template<typename IteratorType>
 size_t max_increasing_len(IteratorType start, IteratorType end)
 {
     size_t max_increasing_len = 0;
+
+    if (start == end) return max_increasing_len;
+    
+    ++start;
+    if (start-- == end) max_increasing_len = 1;
+
+    --end;
 
     for ( ; start != end; ++start)
     {
         auto i = start;
         size_t current_len = 1;
 
-        // testing system does not accept this way
-        while (*i < *(++i))
+        while (i != end)
         {
-            if (i != end) ++current_len;
-            else break; 
+            auto i_prev = i;
+            ++i;
+
+            if (*i_prev < *i) ++current_len;
+            else break;
         }
 
         if (max_increasing_len < current_len) { max_increasing_len = current_len; }
@@ -52,7 +62,7 @@ int main()
 //
     std::list<int> const l5 = {};
     int len5 = max_increasing_len(l5.begin(), l5.end());
-    if(len5 == 0) std::cout << "5  TRUE" << std::endl;
+    if (len5 == 0) std::cout << "5  TRUE" << std::endl;
     else std::cout << "5  FALSE. Expected 0, recieved " << len5 << std::endl;
 //
     std::list<int> const l6 = {1, 1, 1, 1, 1};
