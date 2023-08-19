@@ -84,12 +84,14 @@ bool is_intersect_r_t(Shape * a, Shape * b) { std::cout << "R x T" << std::endl;
 
 // ====================================================================================================================
 
-int main() 
+int main()
 {
     // Multimethod for heirs of 'Shape'
     // Returns 'bool'
     // Commutative
     Multimethod2<Shape, bool, true> is_intersect;
+
+    std::cout << "=== Commutative ===" << std::endl;
 
     is_intersect.addImpl(typeid(Rectangle), typeid(Rectangle), is_intersect_r_r);
     is_intersect.addImpl(typeid(Rectangle), typeid(Triangle), is_intersect_r_t);
@@ -105,6 +107,27 @@ int main()
 
     is_intersect.addImpl(typeid(Rectangle), typeid(Rectangle), is_intersect_rr);
     if (is_intersect.hasImpl(shape2, shape2)) { bool res = is_intersect.call(shape2, shape2); }
+
+    // ================================================================================================================
+
+    // Multimethod for heirs of 'Shape'
+    // Returns 'bool'
+    // Not commutative
+    Multimethod2<Shape, bool, true> is_intersect_not_com;
+
+    std::cout << "=== Not commutative ===" << std::endl;
+
+    is_intersect_not_com.addImpl(typeid(Rectangle), typeid(Rectangle), is_intersect_r_r);
+    is_intersect_not_com.addImpl(typeid(Rectangle), typeid(Triangle), is_intersect_r_t);
+
+    if (is_intersect_not_com.hasImpl(shape1, shape2)) { bool res = is_intersect_not_com.call(shape1, shape2); }
+    if (is_intersect_not_com.hasImpl(shape2, shape1)) { bool res = is_intersect_not_com.call(shape2, shape1); }
+
+    if (is_intersect_not_com.hasImpl(shape1, shape1)) { bool res = is_intersect_not_com.call(shape1, shape1); }
+    if (is_intersect_not_com.hasImpl(shape2, shape2)) { bool res = is_intersect_not_com.call(shape2, shape2); }
+
+    is_intersect_not_com.addImpl(typeid(Rectangle), typeid(Rectangle), is_intersect_rr);
+    if (is_intersect_not_com.hasImpl(shape2, shape2)) { bool res = is_intersect_not_com.call(shape2, shape2); }
 
     return 0;
 }
