@@ -1,3 +1,6 @@
+#ifndef EXPRESSION_HPP
+#define EXPRESSION_HPP
+
 struct Expression
 {
     virtual double evaluate() const = 0;
@@ -60,3 +63,5 @@ private:
     Expression const *right;
     char op;
 };
+
+#endif
