@@ -73,14 +73,19 @@ struct Shape
 };
 
 struct Rectangle : Shape {};
-
 struct Triangle : Shape {};
 
-bool is_intersect_r_r(Shape * a, Shape * b) { std::cout << "R x R" << std::endl; return true; }
+bool is_intersect_r_r(Shape * a, Shape * b) { std::cout << "R x R"; return true; }
+bool is_intersect_rr(Shape * a, Shape * b) { std::cout << "r x r"; return true; }
+bool is_intersect_r_t(Shape * a, Shape * b) { std::cout << "R x T"; return true; }
+bool is_intersect_t_r(Shape * a, Shape * b) { std::cout << "T x R"; return true; }
 
-bool is_intersect_rr(Shape * a, Shape * b) { std::cout << "r x r" << std::endl; return true; }
-
-bool is_intersect_r_t(Shape * a, Shape * b) { std::cout << "R x T" << std::endl; return true; }
+template<typename Base, typename Result, bool Commutative>
+void test(Multimethod2<Base, Result, Commutative> const & m, Shape * shape1, Shape * shape2)
+{
+    if (m.hasImpl(shape1, shape2)) { bool res = m.call(shape1, shape2); }
+    std::cout << std::endl;
+}
 
 // ====================================================================================================================
 
@@ -99,14 +104,23 @@ int main()
     Shape * shape1 = new Triangle();
     Shape * shape2 = new Rectangle();
 
-    if (is_intersect.hasImpl(shape1, shape2)) { bool res = is_intersect.call(shape1, shape2); }
-    if (is_intersect.hasImpl(shape2, shape1)) { bool res = is_intersect.call(shape2, shape1); }
+    test(is_intersect, shape1, shape2); // R x T
+    test(is_intersect, shape2, shape1); // R x T
 
-    if (is_intersect.hasImpl(shape1, shape1)) { bool res = is_intersect.call(shape1, shape1); }
-    if (is_intersect.hasImpl(shape2, shape2)) { bool res = is_intersect.call(shape2, shape2); }
+    is_intersect.addImpl(typeid(Triangle), typeid(Rectangle), is_intersect_t_r);
+
+    test(is_intersect, shape1, shape2); // T x R
+    test(is_intersect, shape2, shape1); // T x R
+
+    is_intersect.addImpl(typeid(Rectangle), typeid(Triangle), is_intersect_t_r);
+    test(is_intersect, shape1, shape2); // T x R
+    test(is_intersect, shape2, shape1); // T x R
+
+    test(is_intersect, shape1, shape1); // 
+    test(is_intersect, shape2, shape2); // R x R
 
     is_intersect.addImpl(typeid(Rectangle), typeid(Rectangle), is_intersect_rr);
-    if (is_intersect.hasImpl(shape2, shape2)) { bool res = is_intersect.call(shape2, shape2); }
+    test(is_intersect, shape2, shape2); // r x r
 
     // ================================================================================================================
 
@@ -120,14 +134,18 @@ int main()
     is_intersect_not_com.addImpl(typeid(Rectangle), typeid(Rectangle), is_intersect_r_r);
     is_intersect_not_com.addImpl(typeid(Rectangle), typeid(Triangle), is_intersect_r_t);
 
-    if (is_intersect_not_com.hasImpl(shape1, shape2)) { bool res = is_intersect_not_com.call(shape1, shape2); }
-    if (is_intersect_not_com.hasImpl(shape2, shape1)) { bool res = is_intersect_not_com.call(shape2, shape1); }
+    test(is_intersect_not_com, shape1, shape2); // 
+    test(is_intersect_not_com, shape2, shape1); // R x T
 
-    if (is_intersect_not_com.hasImpl(shape1, shape1)) { bool res = is_intersect_not_com.call(shape1, shape1); }
-    if (is_intersect_not_com.hasImpl(shape2, shape2)) { bool res = is_intersect_not_com.call(shape2, shape2); }
+    test(is_intersect_not_com, shape1, shape1); // 
+    test(is_intersect_not_com, shape2, shape2); // R x R
 
     is_intersect_not_com.addImpl(typeid(Rectangle), typeid(Rectangle), is_intersect_rr);
-    if (is_intersect_not_com.hasImpl(shape2, shape2)) { bool res = is_intersect_not_com.call(shape2, shape2); }
+    test(is_intersect_not_com, shape2, shape2); // r x r
+
+    is_intersect_not_com.addImpl(typeid(Triangle), typeid(Rectangle), is_intersect_t_r);
+    test(is_intersect_not_com, shape1, shape2); // T x R
+    test(is_intersect_not_com, shape2, shape1); // R x T
 
     return 0;
 }
