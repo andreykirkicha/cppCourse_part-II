@@ -127,7 +127,7 @@ int main()
     // Multimethod for heirs of 'Shape'
     // Returns 'bool'
     // Not commutative
-    Multimethod2<Shape, bool, true> is_intersect_not_com;
+    Multimethod2<Shape, bool, false> is_intersect_not_com;
 
     std::cout << "=== Not commutative ===" << std::endl;
 
