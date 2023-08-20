@@ -9,8 +9,8 @@ template<typename Type>
 class VectorList
 {
 private:
-    using Vect = std::vector<Type>;
-    using List = std::list<Vect>;
+    using Vect = typename std::vector<Type>;
+    using List = typename std::list<Vect>;
 
 public:
     using value_type = Type const;
@@ -44,44 +44,99 @@ public:
         return res;
     }
 // 
-    struct const_iterator : std::iterator<std::bidirectional_iterator_tag, value_type>
+    struct const_iterator : std::iterator<typename std::bidirectional_iterator_tag, value_type>
     {
         const_iterator()                    = default;
         const_iterator(const_iterator &)    = default;
-        const_iterator(VectIterator vect_iter, ListIterator list_iter, List * data_ptr)
-            : vect_iter_(vect_iter), list_iter_(list_iter), data_ptr_(data_ptr) {}
+        const_iterator(ListIterator list_iter, VectIterator vect_iter, List const * data_ptr)
+            :   list_iter_(list_iter),
+                vect_iter_(vect_iter),
+                data_ptr_(data_ptr)
+        {}
         
         ~const_iterator() = default;
 
-        const_iterator operator++(int value)
-        {
-            if (vect_iter_ + value != list_iter_->end()) { std::advance(vect_iter_, value); }
-            else
-            {
-                size_t dist = std::distance(vect_iter_, list_iter_->end());
-                list_iter_++;
-                vect_iter_ = list_iter_->begin();
+        // ============================================================================================================
 
-                int rest = value - dist;
-                vect_iter_ += rest;
+        const_iterator operator++(int)
+        {
+            auto old = const_iterator(list_iter_, vect_iter_, data_ptr_);
+            
+            if (std::next(vect_iter_) != list_iter_->cend()) { ++vect_iter_; }
+            else if (std::next(list_iter_) != data_ptr_->cend())
+            {
+                ++list_iter_;
+                vect_iter_ = list_iter_->cbegin();
             }
+            
+            return old;
         }
 
+        const_iterator & operator++()
+        {
+            if (std::next(vect_iter_) != list_iter_->cend()) { ++vect_iter_; }
+            else if (std::next(list_iter_) != data_ptr_->cend())
+            {
+                ++list_iter_;
+                vect_iter_ = list_iter_->cbegin();
+            }
+
+            return *this;
+        }
+
+        const_iterator operator--(int)
+        {
+            auto old = const_iterator(list_iter_, vect_iter_, data_ptr_);
+            
+            if (vect_iter_ != list_iter_->cbegin()) { --vect_iter_; }
+            else if (list_iter_ != data_ptr_->cbegin())
+            {
+                --list_iter_;
+                vect_iter_ = std::prev(list_iter_->cend());
+            }
+            
+            return old;
+        }
+
+        const_iterator & operator--()
+        {
+            if (vect_iter_ != list_iter_->cbegin()) { --vect_iter_; }
+            else if (list_iter_ != data_ptr_->cbegin())
+            {
+                --list_iter_;
+                vect_iter_ = std::prev(list_iter_->cend());
+            }
+
+            return *this;
+        }
+
+        // ============================================================================================================
+
+        typename VectIterator::reference operator*()   const { return *vect_iter_; }
+        typename VectIterator::pointer  operator->()   const { return  vect_iter_; }
+
     private:
-        VectIterator vect_iter_;
         ListIterator list_iter_;
-        List * data_ptr_;
+        VectIterator vect_iter_;
+        List const * data_ptr_;
     };
 // 
-    // определите методы begin / end
-    // const_iterator begin() const { return ... ; }
-    // const_iterator end()   const { return ... ; }
+    const_iterator begin() const
+    { 
+        if (this->empty()) return const_iterator();
+        return const_iterator(data_.cbegin(), data_.cbegin()->cbegin(), &data_);
+    }
+    const_iterator end() const
+    { 
+        if (this->empty()) return const_iterator();
+        return const_iterator(std::prev(data_.cend()), std::prev(std::prev(data_.cend())->cend()), &data_);
+    }
 // 
     // определите const_reverse_iterator
     // ... const_reverse_iterator ...
 // 
     // определите методы rbegin / rend
-    // const_reverse_iterator rbegin() const { return ... ;   }
+    // const_reverse_iterator rbegin() const { return ... ; }
     // const_reverse_iterator rend()   const { return ... ; }
 
 private:
@@ -94,15 +149,33 @@ int main()
 {
     VectorList<int> vector_list;
     
-    std::vector<int> vec1 = {1, 0, 0};
-    std::vector<int> vec2 = {0, 1, 0};
-    std::vector<int> vec3 = {0, 0, 1};
+    std::vector<int> vec1 = {0, 1, 2};
+    std::vector<int> vec2 = {3, 4, 5};
+    std::vector<int> vec3 = {6, 7, 8};
 
     vector_list.append(vec1.begin(), vec1.end());
     vector_list.append(vec2.begin(), vec2.end());
     vector_list.append(vec3.begin(), vec3.end());
 
-    std::cout << "Size is " << vector_list.size() << std::endl;
+    std::cout   << "Size:\t" << vector_list.size() << std::endl;
+
+    auto begin  = vector_list.begin();
+    auto end    = vector_list.end();
+
+    std::cout   << "Begin:\t" << *begin    << std::endl;
+    std::cout   << "End:\t"   << *end      << std::endl;
+
+    std::cout   << "Pre-increment:\t"
+                << *begin
+                << " ==> "
+                << *(++begin)
+                << std::endl;
+
+    std::cout   << "Post-increment:\t"
+                << *(begin++)
+                << " ==> "
+                << *begin
+                << std::endl;
 
     return 0;
 }
