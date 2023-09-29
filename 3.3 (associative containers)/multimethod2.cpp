@@ -67,7 +67,7 @@ private:
 
 // Application example
 
-struct Shape 
+struct Shape
 {
     virtual void foo() {}
 };
@@ -76,7 +76,7 @@ struct Rectangle : Shape {};
 struct Triangle : Shape {};
 
 bool is_intersect_r_r(Shape * a, Shape * b) { std::cout << "R x R"; return true; }
-bool is_intersect_rr(Shape * a, Shape * b) { std::cout << "r x r"; return true; }
+bool is_intersect_rr(Shape * a, Shape * b ) { std::cout << "r x r"; return true; }
 bool is_intersect_r_t(Shape * a, Shape * b) { std::cout << "R x T"; return true; }
 bool is_intersect_t_r(Shape * a, Shape * b) { std::cout << "T x R"; return true; }
 
